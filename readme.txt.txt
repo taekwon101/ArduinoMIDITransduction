@@ -2,6 +2,14 @@ Transducing to MIDI starter experimentation
 
 Currently takes guitar hero controller (Fender Stratocaster w/ whammy) and interprets whammy as MIDI CC from a Pro Micro board (w/ MidiUSB library, is USB MIDI-compliant out of the box)
 
+To-do
+- bug: whammy bouncing back to default from deep push will trigger a max value and stay there sometimes
+- "debouncing"?
+- map LH notes (1st position to strum trigger and up-neck to instant trigger)
+- strum detection (possibly implement velocity from strum detection)
+- program hammers/pulls as alternative note activation
+- change scale with a body button
+- light LED when note press detected
 
 Notes
 
