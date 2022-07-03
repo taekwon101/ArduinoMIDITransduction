@@ -1,5 +1,5 @@
 #include "MIDIUSB.h"
-#define NUM_BUTTONS  1
+#define NUM_BUTTONS  4
 
 const uint8_t button1 = 2;
 const uint8_t button2 = 3;
@@ -17,7 +17,9 @@ const int intensityPot1 = A1;  //A1 input
 
 const uint8_t buttons[NUM_BUTTONS] = {button1}; //, button2, button3, button4, button5, button6, button7};
 
-const byte notePitches[NUM_BUTTONS] = {48}; //, 50, 52, 53, 55, 56, 58}; //C major scale to assign to up to 7 buttons
+//const byte notePitches[NUM_BUTTONS] = {48}; //, 50, 52, 53, 55, 56, 58}; //C major scale to assign to up to 7 buttons
+const byte notePitches[NUM_BUTTONS] = {52, 55, 57, 59, 62}; //E minor pentatonic to assign to up to 5 buttons
+
 
 uint8_t notesTime[NUM_BUTTONS];
 uint8_t pressedButtons = 0x00;
@@ -39,17 +41,31 @@ void setup() {
 }
 
 void loop() {
-  //readButtons();
+  readButtons();
   readIntensity();
   if (intensity0 != lastintensity0) {
     controlChange(1, 1, intensity0); // (channel number, control number, control value)
     lastintensity0 = intensity0;
   }
   if (intensity1 != lastintensity1) {
-    controlChange(1, 2, intensity1); // (channel number, control number, control value)
+    controlChange(2, 2, intensity1); // (channel number, control number, control value)
     lastintensity1 = intensity1;
   }
-  //playNotes();
+  playNotes();
+}
+
+void readButtons()
+{
+  for (int i = 0; i < NUM_BUTTONS; i++)
+  {
+    if (digitalRead(buttons[i]) == LOW)
+    {
+      bitWrite(pressedButtons, i, 1);
+      //delay(50); replace with debounce?
+    }
+    else
+      bitWrite(pressedButtons, i, 0);
+  }
 }
 
 void readIntensity()
@@ -71,23 +87,8 @@ void controlChange(byte channel, byte control, byte value)
   MidiUSB.sendMIDI(event);
 }
 
-void readButtons()
-{
-  for (int i = 0; i < NUM_BUTTONS; i++)
-  {
-    if (digitalRead(buttons[i]) == LOW)
-    {
-      bitWrite(pressedButtons, i, 1);
-      //delay(50);
-    }
-    else
-      bitWrite(pressedButtons, i, 0);
-  }
-}
-
 void playNotes()
 {
-
   for (int i = 0; i < NUM_BUTTONS; i++)
   {
     if (bitRead(pressedButtons, i) != bitRead(previousButtons, i))
