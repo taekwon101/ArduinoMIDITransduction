@@ -32,7 +32,7 @@ uint8_t lastValMap[NUM_POTS];
 
 //voltage mapping for valid/desirable MIDI signal ranges (21-80 for limited range whammy bar pot)
 uint8_t minMap[NUM_POTS] = {21, 0, 0};
-uint8_t maxMap[NUM_POTS] = {80, 127, 127};
+uint8_t maxMap[NUM_POTS] = {80, 1023, 1023};
 
 //MIDI note value assignment
 const byte notePitches[NUM_BUTTONS] = {52, 55, 57, 59, 62, 64, 67, 69, 71, 74}; //E minor pentatonic repeated through 2 octaves to assign to up to 10 buttons
