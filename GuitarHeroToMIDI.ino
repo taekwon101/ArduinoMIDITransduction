@@ -3,9 +3,7 @@
 #define NUM_BUTTONS  10
 #define NUM_POTS 3
 
-const int ledPin =  16;// the number of the LED pin
-int ledState = LOW;
-
+//transducer input assignments
 const uint8_t fret1 = 2;
 const uint8_t fret2 = 3;
 const uint8_t fret3 = 4;
@@ -21,38 +19,44 @@ const uint8_t whammy = A0;
 const uint8_t pot1 = A1;
 const uint8_t pot2 = A2;
 
+//const int ledPin =  16;
+
+//lists for loop cycling
 const uint8_t frets[NUM_BUTTONS] = {fret1, fret2, fret3, fret4, fret5, fret6, fret7, fret8, fret9, fret10};
 const uint8_t pots[NUM_POTS] = {whammy, pot1, pot2};
 
-uint8_t intensity[NUM_POTS];
-uint8_t lastintensity[NUM_POTS];
+//transduction value and statechange detection
 uint8_t valRaw[NUM_POTS];
 uint8_t valMap[NUM_POTS];
 uint8_t lastValMap[NUM_POTS];
+
+//voltage mapping for valid/desirable MIDI signal ranges (21-80 for limited range whammy bar pot)
 uint8_t minMap[NUM_POTS] = {21, 0, 0};
 uint8_t maxMap[NUM_POTS] = {80, 127, 127};
 
+//MIDI note value assignment
 const byte notePitches[NUM_BUTTONS] = {52, 55, 57, 59, 62, 64, 67, 69, 71, 74}; //E minor pentatonic repeated through 2 octaves to assign to up to 10 buttons
 
 uint8_t notesTime[NUM_BUTTONS];
 uint8_t pressedButtons = 0x00;
 uint8_t previousButtons = 0x00;
 
-int velocityDefault = 80;
-
+//temp bandaid values while prototyping
 bool strummer = true; // permanently true until strummer sensing is implemented
+int strumVelocity = 80; // permanently 80 until strummer intensity is implemented
 
 void setup() {
-  pinMode(ledPin, OUTPUT);
+  //pinMode(ledPin, OUTPUT);
+  int ledState = LOW;
   for (int i = 0; i < NUM_BUTTONS; i++)
     pinMode(frets[i], INPUT_PULLUP);
 }
 
 void loop() {
-  readNotes();
-  readCC();
-  playNotes();
-  MidiUSB.flush();
+  readNotes(); // check fret button state and record all that have changed
+  readCC(); // check potentiometer voltage state and queue remapped MIDI CC values for all that have changed
+  playNotes(); // queue note changes and with strum velocities and check strum condition for those intended to require it
+  MidiUSB.flush(); // send queued MIDI data through USB
 }
 
 void readNotes()
@@ -95,7 +99,7 @@ void playNotes()
         if ((i <= 5) || (strummer == true))
         {
           bitWrite(previousButtons, i , 1);
-          noteOn(0, notePitches[i], velocityDefault);
+          noteOn(0, notePitches[i], strumVelocity);
         }
       }
       else
